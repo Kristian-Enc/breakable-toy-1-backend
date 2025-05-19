@@ -118,6 +118,7 @@ public class Product {
         this.updatedAt = updatedAt;
     }
 
+    // toString
     @Override
     public String toString() {
         return "Product{" +
