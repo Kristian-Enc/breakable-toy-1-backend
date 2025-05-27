@@ -28,12 +28,18 @@ public class ProductController {
             @RequestParam(defaultValue = "name") String sortBy,
             @RequestParam(defaultValue = "asc") String sortDir,
             @RequestParam(required = false) String secondarySortBy,
-            @RequestParam(defaultValue = "asc") String secondarySortDir
-    ){
-        return productService.getSortedAndPaginatedProducts(
-                page, size, sortBy, sortDir, secondarySortBy, secondarySortDir
+            @RequestParam(defaultValue = "asc") String secondarySortDir,
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) Boolean availability
+    ) {
+        return productService.getFilteredSortedPaginatedProducts(
+                page, size, sortBy, sortDir,
+                secondarySortBy, secondarySortDir,
+                name, category, availability
         );
     }
+
 
 
     @PostMapping

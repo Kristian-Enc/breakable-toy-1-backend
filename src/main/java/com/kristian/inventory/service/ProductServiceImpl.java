@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class ProductServiceImpl implements ProductService {
@@ -17,7 +18,6 @@ public class ProductServiceImpl implements ProductService {
         this.productRepository = productRepository;
     }
 
-    // Required
     @Override
     public Product createProduct(Product product){
         return productRepository.save(product);
@@ -28,7 +28,7 @@ public class ProductServiceImpl implements ProductService {
         Optional<Product> existingProductOpt = productRepository.findById(id);
 
         if (existingProductOpt.isEmpty()) {
-            return Optional.empty(); // Nothing to update
+            return Optional.empty();
         }
 
         Product existingProduct = existingProductOpt.get();
@@ -57,14 +57,14 @@ public class ProductServiceImpl implements ProductService {
     public List<Product> searchByName(String name) {
         return productRepository.findAll().stream()
                 .filter(p -> p.getName().toLowerCase().contains(name.toLowerCase()))
-                .toList();
+                .collect(Collectors.toList());
     }
 
     @Override
     public List<Product> filterByCategory(String category) {
         return productRepository.findAll().stream()
                 .filter(p -> p.getCategory().equalsIgnoreCase(category))
-                .toList();
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -74,7 +74,6 @@ public class ProductServiceImpl implements ProductService {
                 .orElse(false);
     }
 
-    // Not required but just in case
     @Override
     public List<Product> getAllProducts(){
         return productRepository.findAll();
@@ -89,10 +88,9 @@ public class ProductServiceImpl implements ProductService {
     public List<Product> getOutOfStockProducts() {
         return productRepository.findAll().stream()
                 .filter(p -> p.getQuantityInStock() == 0)
-                .toList();
+                .collect(Collectors.toList());
     }
 
-    // dto
     @Override
     public InventoryMetrics getInventoryMetrics() {
         List<Product> products = productRepository.findAll();
@@ -176,20 +174,41 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public List<Product> getSortedAndPaginatedProducts(
+    public List<Product> getFilteredSortedPaginatedProducts(
             int page,
             int size,
             String sortBy,
             String sortDir,
             String secondarySortBy,
-            String secondarySortDir
+            String secondarySortDir,
+            String name,
+            String category,
+            Boolean availability
     ) {
         List<Product> products = productRepository.findAll();
+
+        if (name != null && !name.isEmpty()) {
+            products = products.stream()
+                    .filter(p -> p.getName().toLowerCase().contains(name.toLowerCase()))
+                    .collect(Collectors.toList());
+        }
+
+        if (category != null && !category.isEmpty()) {
+            products = products.stream()
+                    .filter(p -> p.getCategory().equalsIgnoreCase(category))
+                    .collect(Collectors.toList());
+        }
+
+        if (availability != null) {
+            products = products.stream()
+                    .filter(p -> availability ? p.getQuantityInStock() > 0 : p.getQuantityInStock() == 0)
+                    .collect(Collectors.toList());
+        }
+
         Comparator<Product> primary = getComparator(sortBy, sortDir);
         Comparator<Product> secondary = (secondarySortBy != null && !secondarySortBy.isEmpty())
                 ? getComparator(secondarySortBy, secondarySortDir)
-                : (Comparator<Product>) (a, b) -> 0;
-
+                : Comparator.comparing(Product::getId);
 
         products.sort(primary.thenComparing(secondary));
 
@@ -215,15 +234,10 @@ public class ProductServiceImpl implements ProductService {
                     Product::getExpirationDate,
                     Comparator.nullsLast(Comparator.naturalOrder())
             );
-            default -> comparator = Comparator.comparing(Product::getId); // fallback
+            case "availability" -> comparator = Comparator.comparingInt(p -> p.getQuantityInStock() > 0 ? 1 : 0);
+            default -> comparator = Comparator.comparing(Product::getId);
         }
 
         return dir.equalsIgnoreCase("desc") ? comparator.reversed() : comparator;
     }
-
-
-
-
-
-
 }
