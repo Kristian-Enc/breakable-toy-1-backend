@@ -1,10 +1,12 @@
 package com.kristian.inventory.repository;
 
 import com.kristian.inventory.model.Product;
+import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.*;
 
+@Repository
 public class InMemoryProductRepository implements ProductRepository {
 
     // This is my HashMap where I will store my data
