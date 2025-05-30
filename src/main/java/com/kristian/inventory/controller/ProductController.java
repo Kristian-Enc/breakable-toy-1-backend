@@ -138,13 +138,14 @@ public class ProductController {
         return productService.getInventoryMetrics();
     }
 
-
-
-
-
-
-
-
-
+    // -------------- testingggggg
+    @GetMapping("/count")
+    public long countFilteredProducts(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) Boolean availability
+    ) {
+        return productService.countFilteredProducts(name, category, availability);
+    }
 
 }

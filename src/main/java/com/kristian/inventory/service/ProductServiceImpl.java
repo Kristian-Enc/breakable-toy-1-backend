@@ -222,6 +222,17 @@ public class ProductServiceImpl implements ProductService {
         return products.subList(start, end);
     }
 
+    // ------------------- JUST FOR TESTING -------------------->>
+    @Override
+    public long countFilteredProducts(String name, String category, Boolean availability) {
+        return productRepository.findAll().stream()
+                .filter(p -> name == null || p.getName().toLowerCase().contains(name.toLowerCase()))
+                .filter(p -> category == null || category.isEmpty() || p.getCategory().equalsIgnoreCase(category))
+                .filter(p -> availability == null || (availability ? p.getQuantityInStock() > 0 : p.getQuantityInStock() == 0))
+                .count();
+    }
+
+
     private Comparator<Product> getComparator(String field, String dir) {
         Comparator<Product> comparator;
 

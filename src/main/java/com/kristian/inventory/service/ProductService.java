@@ -36,13 +36,16 @@ public interface ProductService {
     );
 
 
-    // Not required but just in case
+
     List<Product> getAllProducts();
 
     Optional<Product> getProductById(Long id);
 
     // DTO
     InventoryMetrics getInventoryMetrics();
+
+    long countFilteredProducts(String name, String category, Boolean availability); // JUST TESTING
+
 
 
 }
